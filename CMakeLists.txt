@@ -76,6 +76,12 @@ list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 # ===================== DEPENDENCIES =====================
 # e.g.
 #add_subdirectory(library/motor_drivers/UserCode)
+add_subdirectory(Modules/BasicComponents)
+add_subdirectory(Modules/MotorDrivers)
+add_subdirectory(Modules/ChassisController)
+add_subdirectory(Modules/VelocityProfile)
+add_subdirectory(Modules/TrajectoryControl)
+add_subdirectory(Modules/Sensors)
 
 # =======================================================
 
