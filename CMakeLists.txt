@@ -95,4 +95,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         SensorGyro::HWT101CT
         SensorOPS::ActionOPS
         SensorLaser::STP23L
+
+        Chassis::Mecanum4
 )

@@ -1,0 +1,68 @@
+/**
+ * @file    chassis.cpp
+ * @author  syhanjin
+ * @date    2026-02-02
+ */
+
+#include "chassis.hpp"
+
+#include "device.hpp"
+#include "utils.h"
+
+static PIDMotor::Config motor_wheel_vel_pid = { //
+    .Kp             = 45.0f,
+    .Ki             = 0.15f,
+    .Kd             = 0.00f,
+    .abs_output_max = 8000.0f
+};
+
+chassis::Mecanum4*               chassis_;
+controllers::MotorVelController* motor_vel_ctrl[4];
+
+void APP_Chassis_BeforeUpdate()
+{
+    // 初始化控制器
+    for (size_t i = 0; i < 4; i++)
+        motor_vel_ctrl[i] = static_new_with_vars(
+                i, controllers::MotorVelController(motor_wheel[i], { .pid = motor_wheel_vel_pid }));
+
+    chassis_ = static_new(chassis::Mecanum4(
+            {
+                    .wheel_radius      = 77.0f,              ///< 轮子半径 (unit: mm)
+                    .wheel_distance_x  = 748.60f,            ///< 左右轮距 (unit: mm)
+                    .wheel_distance_y  = 500.00f,            ///< 前后轮距 (unit: mm)
+                    .chassis_type      = chassis::Mecanum4::ChassisType::OType, ///< 底盘构型
+                    .wheel_front_right = motor_vel_ctrl[2], ///< 右前方
+                    .wheel_front_left  = motor_vel_ctrl[3], ///< 左前方
+                    .wheel_rear_left   = motor_vel_ctrl[0], ///< 左后方
+                    .wheel_rear_right  = motor_vel_ctrl[1], ///< 右后方
+            },{
+                .posture_error_pd_cfg = {
+                    .vx = {.Kp = 5, .Kd = 3.0f, .abs_output_max = 0.1f},
+                    .vy = {.Kp = 5, .Kd = 3.0f, .abs_output_max = 0.1f},
+                    .wz = {.Kp = 30, .Kd = 4.0f, .abs_output_max = 25.0f},
+                },
+                .feedback_source = {
+                    .wz = &sensor_gyro_yaw->getWz(),
+                    .x = &sensor_ops->getBodyX(),
+                    .y = &sensor_ops->getBodyY(),
+                    .yaw = &sensor_ops->getBodyYaw(),
+                },
+                .limit = {
+                    .x = CHASSIS_DEFAULT_TRANSLATION_LIMIT,
+                    .y = CHASSIS_DEFAULT_TRANSLATION_LIMIT,
+                    .yaw = CHASSIS_DEFAULT_ROTATION_LIMIT
+                }
+            }));
+}
+
+void APP_Chassis_Init()
+{
+    // 获取底盘控制权
+    if (!chassis_->enable())
+        Error_Handler();
+
+    // 重设底盘坐标系
+    if (!sensor_ops->resetWorldCoord())
+        Error_Handler();
+}
