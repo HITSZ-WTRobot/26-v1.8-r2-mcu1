@@ -19,11 +19,16 @@ motors::DJIMotor*        motor_slide[2]; // 前后滑行电机
 motors::DJIMotor*        motor_fold[2];  // 折叠电机
 sensors::gyro::HWT101CT* sensor_gyro_yaw;
 sensors::ops::ActionOPS* sensor_ops;
-sensors::laser::STP23L*  sensor_stp23l; // 激光测距（stp23l）
+sensors::laser::STP23L*  sensor_stp23l;           // 激光测距（stp23l）
+sensors::laser::DT35*    sensor_laser_dt35_left;  // 左侧激光测距（DT35）
+sensors::laser::DT35*    sensor_laser_dt35_right; // 右侧激光测距（DT35)
+
+sensors::laser::DT35Board* sensor_laser_dt35_board; // DT35 驱动板
 
 UartRxSync_DefineCallback(sensor_gyro_yaw);
 UartRxSync_DefineCallback(sensor_ops);
 UartRxSync_DefineCallback(sensor_stp23l);
+UartRxSync_DefineCallback(sensor_laser_dt35_board);
 
 static void sensor_init()
 {
@@ -40,9 +45,24 @@ static void sensor_init()
     UartRxSync_RegisterCallback(sensor_stp23l, DEVICE_SENSOR_STP23L_UART);
     sensor_stp23l = static_new(sensors::laser::STP23L(DEVICE_SENSOR_STP23L_UART));
 
+    sensor_laser_dt35_left = static_new(
+            sensors::laser::DT35({ .near = { .raw_data = 0, .distance = 0.0f },
+                                   .far  = { .raw_data = 6452000, .distance = 7.4f },
+                                   .k    = 1.0f }));
+
+    sensor_laser_dt35_right = static_new(
+            sensors::laser::DT35({ .near = { .raw_data = 14848, .distance = 0.073f },
+                                   .far  = { .raw_data = 6474752, .distance = 0.423f },
+                                   .k    = 0.0985765f }));
+
+    UartRxSync_RegisterCallback(sensor_laser_dt35_board, DEVICE_SENSOR_DT35_BOARD_UART);
+    sensor_laser_dt35_board = static_new(sensors::laser::DT35Board(DEVICE_SENSOR_DT35_BOARD_UART));
+    sensor_laser_dt35_board->registerChannel(0, sensor_laser_dt35_right);
+    sensor_laser_dt35_board->registerChannel(1, sensor_laser_dt35_left);
+
     // device enable
     if (!sensor_gyro_yaw->startReceive() || !sensor_ops->startReceive() ||
-        !sensor_stp23l->startReceive())
+        !sensor_stp23l->startReceive() || !sensor_laser_dt35_board->startReceive())
     {
         Error_Handler();
     }
@@ -180,6 +200,8 @@ bool APP_Device_isAllConnected()
     all_connected &= sensor_ops->isConnected();
 
     all_connected &= sensor_stp23l->isConnected();
+
+    all_connected &= sensor_laser_dt35_board->isConnected();
 
     // check motors
     for (const auto& m : motor_wheel)

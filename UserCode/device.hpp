@@ -6,6 +6,7 @@
 #pragma once
 
 #include "ActionOPS.hpp"
+#include "DT35.hpp"
 #include "dji.hpp"
 #include "HWT101CT.hpp"
 #include "STP23L.hpp"
@@ -55,6 +56,15 @@ extern sensors::ops::ActionOPS* sensor_ops;
  */
 extern sensors::laser::STP23L* sensor_stp23l;
 #define DEVICE_SENSOR_STP23L_UART (&huart3)
+
+/**
+ * DT35 驱动板，UART1
+ * Channel 1: 右侧
+ * Channel 2: 左侧
+ */
+extern sensors::laser::DT35* sensor_laser_dt35_left;  // 左侧激光测距（DT35）
+extern sensors::laser::DT35* sensor_laser_dt35_right; // 右侧激光测距（DT35)
+#define DEVICE_SENSOR_DT35_BOARD_UART (&huart1)
 
 void APP_Device_Init();
 void APP_Device_Update_1kHz();
