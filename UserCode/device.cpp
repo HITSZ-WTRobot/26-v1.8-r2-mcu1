@@ -82,7 +82,7 @@ static void can_init()
     HAL_CAN_RegisterCallback(&hcan1, HAL_CAN_RX_FIFO0_MSG_PENDING_CB_ID, CAN_Fifo0ReceiveCallback);
     CAN_Start(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
     HAL_CAN_RegisterCallback(&hcan2, HAL_CAN_RX_FIFO0_MSG_PENDING_CB_ID, CAN_Fifo0ReceiveCallback);
-    CAN_Start(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
+    CAN_Start(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);
 }
 
 constexpr motors::DJIMotor::Config motor_wheel_config[4] = {
