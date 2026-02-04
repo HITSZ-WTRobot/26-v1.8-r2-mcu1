@@ -18,15 +18,15 @@ motors::DJIMotor*        motor_slide[2]; // 前后滑行电机
 motors::DJIMotor*        motor_fold[2];  // 折叠电机
 sensors::gyro::HWT101CT* sensor_gyro_yaw;
 sensors::ops::ActionOPS* sensor_ops;
-sensors::laser::STP23L*  sensor_stp23l;           // 激光测距（stp23l）
-sensors::laser::DT35*    sensor_laser_dt35_left;  // 左侧激光测距（DT35）
-sensors::laser::DT35*    sensor_laser_dt35_right; // 右侧激光测距（DT35)
+// sensors::laser::STP23L*  sensor_stp23l;           // 激光测距（stp23l）
+sensors::laser::DT35* sensor_laser_dt35_left;  // 左侧激光测距（DT35）
+sensors::laser::DT35* sensor_laser_dt35_right; // 右侧激光测距（DT35)
 
 sensors::laser::DT35Board* sensor_laser_dt35_board; // DT35 驱动板
 
 UartRxSync_DefineCallback(sensor_gyro_yaw);
 UartRxSync_DefineCallback(sensor_ops);
-UartRxSync_DefineCallback(sensor_stp23l);
+// UartRxSync_DefineCallback(sensor_stp23l);
 UartRxSync_DefineCallback(sensor_laser_dt35_board);
 
 static void sensor_init()
@@ -43,8 +43,8 @@ static void sensor_init()
                                       .yaw_offset = -90.0f,
                                       .yaw_car    = &sensor_gyro_yaw->getYaw() });
 
-    UartRxSync_RegisterCallback(sensor_stp23l, DEVICE_SENSOR_STP23L_UART);
-    sensor_stp23l = new laser::STP23L(DEVICE_SENSOR_STP23L_UART);
+    // UartRxSync_RegisterCallback(sensor_stp23l, DEVICE_SENSOR_STP23L_UART);
+    // sensor_stp23l = new laser::STP23L(DEVICE_SENSOR_STP23L_UART);
 
     sensor_laser_dt35_left = new laser::DT35({ .near = { .raw_data = 0, .distance = 0.0f },
                                                .far  = { .raw_data = 6452000, .distance = 7.4f },
@@ -64,8 +64,8 @@ static void sensor_init()
         Error_Handler();
     if (!sensor_ops->startReceive())
         Error_Handler();
-    if (!sensor_stp23l->startReceive())
-        Error_Handler();
+    // if (!sensor_stp23l->startReceive())
+    //     Error_Handler();
     if (!sensor_laser_dt35_board->startReceive())
         Error_Handler();
 }
@@ -186,7 +186,7 @@ void APP_Device_Init()
     can_init();
 
     wheel_motor_init();
-    elevator_motor_init();
+    // elevator_motor_init();
 }
 
 void APP_Device_Update_1kHz()
@@ -203,7 +203,7 @@ bool APP_Device_isAllConnected()
 
     all_connected &= sensor_ops->isConnected();
 
-    all_connected &= sensor_stp23l->isConnected();
+    // all_connected &= sensor_stp23l->isConnected();
 
     all_connected &= sensor_laser_dt35_board->isConnected();
 
@@ -211,14 +211,14 @@ bool APP_Device_isAllConnected()
     for (const auto& m : motor_wheel)
         all_connected &= m->isConnected();
 
-    for (const auto& m : motor_elev)
-        all_connected &= m->isConnected();
+    // for (const auto& m : motor_elev)
+    //     all_connected &= m->isConnected();
 
-    for (const auto& m : motor_slide)
-        all_connected &= m->isConnected();
+    // for (const auto& m : motor_slide)
+    //     all_connected &= m->isConnected();
 
-    for (const auto& m : motor_fold)
-        all_connected &= m->isConnected();
+    // for (const auto& m : motor_fold)
+    //     all_connected &= m->isConnected();
 
     return all_connected;
 }

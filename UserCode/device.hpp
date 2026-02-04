@@ -54,8 +54,8 @@ extern sensors::ops::ActionOPS* sensor_ops;
  * 激光测距传感器
  * STP23L, UART3
  */
-extern sensors::laser::STP23L* sensor_stp23l;
-#define DEVICE_SENSOR_STP23L_UART (&huart3)
+// extern Slot<sensors::laser::STP23L> sensor_stp23l;
+// #define DEVICE_SENSOR_STP23L_UART (&huart3)
 
 /**
  * DT35 驱动板，UART1
