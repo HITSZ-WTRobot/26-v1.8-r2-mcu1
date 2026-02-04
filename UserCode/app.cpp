@@ -11,6 +11,7 @@
 #include "dji.hpp"
 #include "system.hpp"
 #include "tim.h"
+#include "Mecanum4.hpp"
 
 size_t prescaler = 0;
 
@@ -27,6 +28,11 @@ extern "C" void TIM_Callback_200Hz(TIM_HandleTypeDef* htim)
 {
     APP_Chassis_Update_200Hz();
 }
+
+chassis::IChassis::Posture target;
+
+bool                             relocalize_flag = false;
+sensors::ops::ActionOPS::Posture relocalize_target;
 
 /**
  * @brief Function implementing the initTask thread.
@@ -59,6 +65,27 @@ extern "C" void Init(void* argument)
     osDelay(1000);
 
     osEventFlagsSet(systemEventHandle, SYSTEM_INITIALIZED);
+
+    chassis::IChassis::Posture target_ = target;
+
+    for (;;)
+    {
+        if (relocalize_flag)
+        {
+            relocalize_flag = false;
+            sensor_ops->resetWorldCoordByPose(relocalize_target);
+            chassis_->stop();
+        }
+
+        if (target_.x != target.x || target_.y != target.y || target_.yaw != target.yaw)
+        {
+            target_ = target;
+            chassis_->setTargetPostureInWorld(target);
+            chassis_->waitTrajectoryFinish();
+        }
+
+        osDelay(1);
+    }
 
     /* 初始化完成后退出线程 */
     osThreadExit();
