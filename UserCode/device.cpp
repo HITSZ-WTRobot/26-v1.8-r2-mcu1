@@ -11,7 +11,6 @@
 #include "can.h"
 #include "dji.hpp"
 #include "usart.h"
-#include "utils.h"
 
 motors::DJIMotor*        motor_wheel[4]; // 底盘轮子电机
 motors::DJIMotor*        motor_elev[2];  // 升降电机
@@ -32,31 +31,31 @@ UartRxSync_DefineCallback(sensor_laser_dt35_board);
 
 static void sensor_init()
 {
-    UartRxSync_RegisterCallback(sensor_gyro_yaw, DEVICE_SENSOR_GYRO_YAW_UART);
-    sensor_gyro_yaw = static_new(sensors::gyro::HWT101CT(DEVICE_SENSOR_GYRO_YAW_UART));
+    using namespace sensors;
 
-    UartRxSync_RegisterCallback(sensor_ops, DEVICE_SENSOR_GYRO_YAW_UART);
-    sensor_ops = static_new(sensors::ops::ActionOPS(DEVICE_SENSOR_OPS_UART,
-                                                    { .x_offset   = -276.0f,
-                                                      .y_offset   = 0.0f,
-                                                      .yaw_offset = -90.0f,
-                                                      .yaw_car    = &sensor_gyro_yaw->getYaw() }));
+    UartRxSync_RegisterCallback(sensor_gyro_yaw, DEVICE_SENSOR_GYRO_YAW_UART);
+    sensor_gyro_yaw = new gyro::HWT101CT(DEVICE_SENSOR_GYRO_YAW_UART);
+
+    UartRxSync_RegisterCallback(sensor_ops, DEVICE_SENSOR_OPS_UART);
+    sensor_ops = new ops::ActionOPS(DEVICE_SENSOR_OPS_UART,
+                                    { .x_offset   = -276.0f,
+                                      .y_offset   = 0.0f,
+                                      .yaw_offset = -90.0f,
+                                      .yaw_car    = &sensor_gyro_yaw->getYaw() });
 
     UartRxSync_RegisterCallback(sensor_stp23l, DEVICE_SENSOR_STP23L_UART);
-    sensor_stp23l = static_new(sensors::laser::STP23L(DEVICE_SENSOR_STP23L_UART));
+    sensor_stp23l = new laser::STP23L(DEVICE_SENSOR_STP23L_UART);
 
-    sensor_laser_dt35_left = static_new(
-            sensors::laser::DT35({ .near = { .raw_data = 0, .distance = 0.0f },
-                                   .far  = { .raw_data = 6452000, .distance = 7.4f },
-                                   .k    = 1.0f }));
+    sensor_laser_dt35_left = new laser::DT35({ .near = { .raw_data = 0, .distance = 0.0f },
+                                               .far  = { .raw_data = 6452000, .distance = 7.4f },
+                                               .k    = 1.0f });
 
-    sensor_laser_dt35_right = static_new(
-            sensors::laser::DT35({ .near = { .raw_data = 14848, .distance = 0.073f },
-                                   .far  = { .raw_data = 6474752, .distance = 0.423f },
-                                   .k    = 0.0985765f }));
+    sensor_laser_dt35_right = new laser::DT35({ .near = { .raw_data = 14848, .distance = 0.073f },
+                                                .far  = { .raw_data = 6474752, .distance = 0.423f },
+                                                .k    = 0.0985765f });
 
     UartRxSync_RegisterCallback(sensor_laser_dt35_board, DEVICE_SENSOR_DT35_BOARD_UART);
-    sensor_laser_dt35_board = static_new(sensors::laser::DT35Board(DEVICE_SENSOR_DT35_BOARD_UART));
+    sensor_laser_dt35_board = new laser::DT35Board(DEVICE_SENSOR_DT35_BOARD_UART);
     sensor_laser_dt35_board->registerChannel(0, sensor_laser_dt35_right);
     sensor_laser_dt35_board->registerChannel(1, sensor_laser_dt35_left);
 
@@ -112,8 +111,9 @@ constexpr motors::DJIMotor::Config motor_wheel_config[4] = {
 
 static void wheel_motor_init()
 {
+    using namespace motors;
     for (size_t i = 0; i < 4; ++i)
-        motor_wheel[i] = static_new_with_vars(i, motors::DJIMotor(motor_wheel_config[i]));
+        motor_wheel[i] = new DJIMotor(motor_wheel_config[i]);
 }
 
 constexpr motors::DJIMotor::Config motor_elevator_config[2] = {
@@ -165,14 +165,15 @@ constexpr motors::DJIMotor::Config motor_fold_config[2] = {
 
 static void elevator_motor_init()
 {
+    using namespace motors;
     for (size_t i = 0; i < 2; ++i)
-        motor_elev[i] = static_new_with_vars(i, motors::DJIMotor(motor_elevator_config[i]));
+        motor_elev[i] = new DJIMotor(motor_elevator_config[i]);
 
     for (size_t i = 0; i < 2; ++i)
-        motor_slide[i] = static_new_with_vars(i, motors::DJIMotor(motor_slide_config[i]));
+        motor_slide[i] = new DJIMotor(motor_slide_config[i]);
 
     for (size_t i = 0; i < 2; ++i)
-        motor_fold[i] = static_new_with_vars(i, motors::DJIMotor(motor_fold_config[i]));
+        motor_fold[i] = new DJIMotor(motor_fold_config[i]);
 }
 
 void APP_Device_Init()

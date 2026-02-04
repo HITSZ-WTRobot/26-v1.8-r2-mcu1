@@ -22,16 +22,17 @@ controllers::MotorVelController* motor_vel_ctrl[4];
 void APP_Chassis_BeforeUpdate()
 {
     // 初始化控制器
-    for (size_t i = 0; i < 4; i++)
-        motor_vel_ctrl[i] = static_new_with_vars(
-                i, controllers::MotorVelController(motor_wheel[i], { .pid = motor_wheel_vel_pid }));
+    using chassis::Mecanum4;
+    using controllers::MotorVelController;
 
-    chassis_ = static_new(chassis::Mecanum4(
-            {
+    for (size_t i = 0; i < 4; i++)
+        motor_vel_ctrl[i] = new MotorVelController(motor_wheel[i], { .pid = motor_wheel_vel_pid });
+
+    chassis_ = new Mecanum4({
                     .wheel_radius      = 77.0f,              ///< 轮子半径 (unit: mm)
                     .wheel_distance_x  = 748.60f,            ///< 左右轮距 (unit: mm)
                     .wheel_distance_y  = 500.00f,            ///< 前后轮距 (unit: mm)
-                    .chassis_type      = chassis::Mecanum4::ChassisType::OType, ///< 底盘构型
+                    .chassis_type      = Mecanum4::ChassisType::OType, ///< 底盘构型
                     .wheel_front_right = motor_vel_ctrl[2], ///< 右前方
                     .wheel_front_left  = motor_vel_ctrl[3], ///< 左前方
                     .wheel_rear_left   = motor_vel_ctrl[0], ///< 左后方
@@ -53,7 +54,7 @@ void APP_Chassis_BeforeUpdate()
                     .y = CHASSIS_DEFAULT_TRANSLATION_LIMIT,
                     .yaw = CHASSIS_DEFAULT_ROTATION_LIMIT
                 }
-            }));
+            });
 }
 
 void APP_Chassis_Init()
