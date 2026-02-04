@@ -60,11 +60,14 @@ static void sensor_init()
     sensor_laser_dt35_board->registerChannel(1, sensor_laser_dt35_left);
 
     // device enable
-    if (!sensor_gyro_yaw->startReceive() || !sensor_ops->startReceive() ||
-        !sensor_stp23l->startReceive() || !sensor_laser_dt35_board->startReceive())
-    {
+    if (!sensor_gyro_yaw->startReceive())
         Error_Handler();
-    }
+    if (!sensor_ops->startReceive())
+        Error_Handler();
+    if (!sensor_stp23l->startReceive())
+        Error_Handler();
+    if (!sensor_laser_dt35_board->startReceive())
+        Error_Handler();
 }
 
 static void can_init()
