@@ -48,7 +48,7 @@ extern sensors::gyro::HWT101CT* sensor_gyro_yaw;
  * Action-OPS, UART6
  */
 extern sensors::ops::ActionOPS* sensor_ops;
-#define DEVICE_SENSOR_OPS_UART (&huart6)
+#define DEVICE_SENSOR_OPS_UART (&huart5)
 
 /**
  * 激光测距传感器
