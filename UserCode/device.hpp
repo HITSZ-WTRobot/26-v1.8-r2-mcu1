@@ -66,6 +66,11 @@ extern sensors::laser::DT35* sensor_laser_dt35_left;  // 左侧激光测距（DT
 extern sensors::laser::DT35* sensor_laser_dt35_right; // 右侧激光测距（DT35)
 #define DEVICE_SENSOR_DT35_BOARD_UART (&huart1)
 
+/*
+ * 上位机通信串口
+ */
+#define DEVICE_PC_COMMUNICATION_UART (&huart4)
+
 void APP_Device_Init();
 void APP_Device_Update_1kHz();
 bool APP_Device_isAllConnected();

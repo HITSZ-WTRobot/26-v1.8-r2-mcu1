@@ -5,10 +5,12 @@
  */
 #include "app.hpp"
 
+#include "crc.hpp"
 #include "chassis.hpp"
 #include "cmsis_os2.h"
 #include "device.hpp"
 #include "dji.hpp"
+#include "protocol.hpp"
 #include "system.hpp"
 #include "tim.h"
 
@@ -37,6 +39,8 @@ extern "C" void Init(void* argument)
 {
     /* 初始化代码 */
     APP_Device_Init();
+
+    Protocol_Init();
 
     APP_Chassis_BeforeUpdate();
 
