@@ -98,4 +98,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         SensorLaser::DT35
 
         Chassis::Mecanum4
+        Chassis::Controller
 )

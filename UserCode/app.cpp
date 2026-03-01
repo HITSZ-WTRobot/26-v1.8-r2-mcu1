@@ -23,9 +23,9 @@ extern "C" void TIM_Callback_1kHz(TIM_HandleTypeDef* htim)
     service::Watchdog::EatAll();
 }
 
-extern "C" void TIM_Callback_200Hz(TIM_HandleTypeDef* htim)
+extern "C" void TIM_Callback_100Hz(TIM_HandleTypeDef* htim)
 {
-    APP_Chassis_Update_200Hz();
+    APP_Chassis_Update_100Hz();
 }
 
 /**
@@ -43,7 +43,7 @@ extern "C" void Init(void* argument)
     // 启动定时器
     HAL_TIM_RegisterCallback(&htim6, HAL_TIM_PERIOD_ELAPSED_CB_ID, TIM_Callback_1kHz);
     HAL_TIM_Base_Start_IT(&htim6);
-    HAL_TIM_RegisterCallback(&htim13, HAL_TIM_PERIOD_ELAPSED_CB_ID, TIM_Callback_200Hz);
+    HAL_TIM_RegisterCallback(&htim13, HAL_TIM_PERIOD_ELAPSED_CB_ID, TIM_Callback_100Hz);
     HAL_TIM_Base_Start_IT(&htim13);
 
     // 等待各设备连接

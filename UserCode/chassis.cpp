@@ -16,9 +16,26 @@ static PIDMotor::Config motor_wheel_vel_pid = { //
     .abs_output_max = 8000.0f
 };
 
-chassis::Mecanum4*               chassis_;
+Chassis*                         chassis_;
 controllers::MotorVelController* motor_vel_ctrl[4];
 
+void APP_Chassis_Update_100Hz()
+{
+    chassis_->trajectoryUpdate();
+}
+void APP_Chassis_Update_1kHz()
+{
+    static uint32_t prescaler_500Hz = 0;
+
+    chassis_->feedbackUpdate(0.001);
+    prescaler_500Hz++;
+    if (prescaler_500Hz >= 2)
+    {
+        chassis_->errorUpdate();
+        prescaler_500Hz = 0;
+    }
+    chassis_->controllerUpdate();
+}
 void APP_Chassis_BeforeUpdate()
 {
     // 初始化控制器
@@ -28,7 +45,7 @@ void APP_Chassis_BeforeUpdate()
     for (size_t i = 0; i < 4; i++)
         motor_vel_ctrl[i] = new MotorVelController(motor_wheel[i], { .pid = motor_wheel_vel_pid });
 
-    chassis_ = new Mecanum4({
+    chassis_ = new Chassis(Mecanum4({
                     .wheel_radius      = 77.0f,              ///< 轮子半径 (unit: mm)
                     .wheel_distance_x  = 748.60f,            ///< 左右轮距 (unit: mm)
                     .wheel_distance_y  = 500.00f,            ///< 前后轮距 (unit: mm)
@@ -38,22 +55,16 @@ void APP_Chassis_BeforeUpdate()
                     .wheel_rear_left   = motor_vel_ctrl[0], ///< 左后方
                     .wheel_rear_right  = motor_vel_ctrl[1], ///< 右后方
             },{
-                .posture_error_pd_cfg = {
-                    .vx = {.Kp = 5, .Kd = 3.0f, .abs_output_max = 0.1f},
-                    .vy = {.Kp = 5, .Kd = 3.0f, .abs_output_max = 0.1f},
-                    .wz = {.Kp = 30, .Kd = 4.0f, .abs_output_max = 25.0f},
-                },
                 .feedback_source = {
                     .wz = &sensor_gyro_yaw->getWz(),
                     .x = &sensor_ops->getBodyX(),
                     .y = &sensor_ops->getBodyY(),
                     .yaw = &sensor_ops->getBodyYaw(),
                 },
-                .limit = {
-                    .x = CHASSIS_DEFAULT_TRANSLATION_LIMIT,
-                    .y = CHASSIS_DEFAULT_TRANSLATION_LIMIT,
-                    .yaw = CHASSIS_DEFAULT_ROTATION_LIMIT
-                }
+            }), {
+                .vx = {.Kp = 5, .Kd = 3.0f, .abs_output_max = 0.1f},
+                .vy = {.Kp = 5, .Kd = 3.0f, .abs_output_max = 0.1f},
+                .wz = {.Kp = 30, .Kd = 4.0f, .abs_output_max = 25.0f},
             });
 }
 
